@@ -1,0 +1,10 @@
+[project]
+name = "news-summarizer-api"
+version = "0.1.0"
+description = "A FastAPI application for summarizing news articles using LangChain and LLMs."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.2",
+    "uvicorn>=0.36.0",
+]
