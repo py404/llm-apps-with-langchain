@@ -19,6 +19,13 @@ class ArticleRequest(BaseModel):
         return self
 
 
+class ArticleContent(BaseModel):
+    """Pydantic model for article content returned by ArticleFetcher."""
+
+    title: str = Field(..., description="The title of the news article.")
+    text: str = Field(..., description="The full text content of the news article.")
+
+
 class SummaryResponse(BaseModel):
     """Pydantic model for summary response."""
 
