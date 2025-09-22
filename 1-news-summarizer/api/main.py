@@ -30,9 +30,8 @@ async def summarize_article(
     Endpoint to summarize a news article given its URL or text.
     """
     try:
-        fetcher = ArticleFetcher(
-            url="https://newsletter.techworld-with-milan.com/p/what-i-learned-from-the-book-designing"
-        )
+        url = request.url
+        fetcher = ArticleFetcher(url=url)
         article = fetcher.fetch_article()
         print(f"Title: {article.title}")
         print(f"Text: {article.text[:200]}...")  # Print first

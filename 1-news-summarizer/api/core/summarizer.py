@@ -1,6 +1,7 @@
-from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from loguru import logger
+from openai import OpenAIError
 
 from core.interfaces import SummarizerInterface
 
@@ -28,6 +29,12 @@ class NewsArticleSummarizer(SummarizerInterface):
             raise Exception("LLM client is not initialized.")
 
         combined_text = f"Title: {article_title}\n\n{article_text}"
-
-        summary = await self.chain.ainvoke(combined_text)
-        return summary.content
+        try:
+            summary = await self.chain.ainvoke(combined_text)
+            return summary.content
+        except OpenAIError as e:
+            logger.error(f"OpenAI API error during summarization: {e}")
+            raise e
+        except Exception as e:
+            logger.error(f"Unexpected error during summarization: {e}")
+            raise e
