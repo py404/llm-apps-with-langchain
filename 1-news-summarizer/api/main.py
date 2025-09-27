@@ -49,16 +49,20 @@ async def summarize_article(
 
         logger.info(f"Article Title: {article.title}")
         logger.info(f"Article Text: {article.text[:100]}...")  # Log first 100 chars
-        summary = await summarizer.summarize(
+        summary, structured_summary = await summarizer.summarize(
             article_title=article.title, article_text=article.text
         )
         logger.info(f"Summary: {summary}")
         logger.info("Summarization completed successfully")
 
-        return SummaryResponse(summary=summary, source_url=request.url)
+        return SummaryResponse(summary=summary, structured_summary=structured_summary, source_url=request.url)
 
     except OpenAIError as e:
         logger.error(f"OpenAI API Error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="LLM error during summarization",
+        )
 
     except Exception as e:
         logger.error(f"Error during summarization: {e}")
