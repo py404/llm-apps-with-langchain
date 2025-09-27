@@ -43,6 +43,39 @@ def main():
             if result and "summary" in result:
                 # st.subheader("Summary")
                 st.write(result["summary"])
+
+                # Display structured keywords as tags if available
+                structured = result.get("structured_summary") or {}
+                keywords = None
+
+                # structured may be a dict (from API) or a JSON-string in some setups; we handle dicts here
+                if isinstance(structured, dict):
+                    keywords = structured.get("keywords")
+                    tl_dr = structured.get("tl_dr")
+                else:
+                    # fallback: try top-level fields
+                    keywords = result.get("keywords")
+                    tl_dr = result.get("tl_dr")
+
+                # show TL;DR if present
+                if tl_dr:
+                    st.markdown("**TL;DR:**")
+                    st.write(tl_dr)
+
+                if keywords:
+                    # ensure keywords is a list
+                    if isinstance(keywords, str):
+                        # comma separated fallback
+                        keywords_list = [k.strip() for k in keywords.split(",") if k.strip()]
+                    else:
+                        keywords_list = list(keywords)
+
+                    # Build simple badge-like HTML for keywords
+                    tags_html = " ".join(
+                        f'<span style="display:inline-block;background:#EEF2FF;color:#0b53ff;border-radius:999px;padding:4px 8px;margin:3px;font-size:0.9em">{kw}</span>'
+                        for kw in keywords_list
+                    )
+                    st.markdown("<div style='margin-top:6px'>" + tags_html + "</div>", unsafe_allow_html=True)
             else:
                 st.error("Failed to get summary.")
 

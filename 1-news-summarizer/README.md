@@ -63,7 +63,7 @@ Run backend:
 ```shell
 cd 1-news-summarizer/api
 uv sync
-uv run fastapi run dev
+uv run fastapi dev main.py
 ```
 
 The endpoint will be available at `http://localhost:8000/summarize` and docs at `http://localhost:8000/docs`.
