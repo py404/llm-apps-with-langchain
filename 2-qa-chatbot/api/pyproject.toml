@@ -1,0 +1,17 @@
+[project]
+name = "qa-chatbot-api"
+version = "0.1.0"
+description = "A QA Chatbot API using FastAPI and LangChain with conversational capabilities."
+authors = [ { name="Phani Atmakur" } ]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.118.0",
+    "loguru>=0.7.3",
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.11.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.13.2",
+]
