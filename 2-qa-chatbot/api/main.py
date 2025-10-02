@@ -1,12 +1,8 @@
+from _app import create_app
 from fastapi import FastAPI
 from loguru import logger
 
-app = FastAPI(
-    title="QA Chatbot API",
-    description="API for a Question-Answering Chatbot",
-    version="1.0.0",
-    docs_url="/docs",
-)
+app: FastAPI = create_app()
 
 
 @app.get("/")
