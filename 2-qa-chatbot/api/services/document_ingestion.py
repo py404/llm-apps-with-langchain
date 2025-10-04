@@ -1,13 +1,14 @@
 """Document ingestion pipeline for turning URLs into Milvus embeddings."""
 
-from core.config import get_settings
-from core.vector_store import DocumentStore
 from langchain.docstore.document import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders.url_selenium import SeleniumURLLoader
-from langchain_openai.embeddings import OpenAIEmbeddings
 from loguru import logger
 from pydantic import HttpUrl
+from pymilvus.model.dense import OpenAIEmbeddingFunction
+
+from api.core.config import get_settings
+from api.core.vector_store import DocumentStore
 
 
 class DocumentIngestionService:
@@ -24,17 +25,15 @@ class DocumentIngestionService:
             chunk_size=self.settings.chunk_size,
             chunk_overlap=self.settings.chunk_overlap,
         )
-        self.embeddings = OpenAIEmbeddings(
+        self.embedding_fn = OpenAIEmbeddingFunction(
+            model_name=self.settings.openai_embeddings_model,
             api_key=self.settings.openai_api_key,
-            model=self.settings.openai_embeddings_model,
         )
         self.store = DocumentStore()
 
     def _load_raw_documents(self) -> list[Document]:
         docs = self.loader.load()
-        logger.info(
-            "Loaded {} documents from {} URLs", len(docs), len(self.loader.urls)
-        )
+        logger.info(f"Loaded {len(docs)} documents from {len(self.loader.urls)} URLs")
         return docs
 
     def _clean_documents(self, docs: list[Document]) -> list[Document]:
@@ -43,13 +42,13 @@ class DocumentIngestionService:
 
     def _split_documents(self, docs: list[Document]) -> list[Document]:
         chunks = self.text_splitter.split_documents(docs)
-        logger.info("Split into {} chunks", len(chunks))
+        logger.info(f"Split into {len(chunks)} chunks")
         return chunks
 
     def _embed_documents(self, chunks: list[Document]) -> list[list[float]]:
         texts = [chunk.page_content for chunk in chunks]
-        vectors = self.embeddings.embed_documents(texts)
-        logger.info("Generated {} embeddings", len(vectors))
+        vectors = self.embedding_fn.encode_documents(texts)
+        logger.info(f"Generated {len(vectors)} embeddings")
         return vectors
 
     def _store_embeddings(self, chunks: list[Document], embeddings: list[list[float]]):
