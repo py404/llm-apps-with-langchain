@@ -2,7 +2,7 @@
 
 from langchain_openai.chat_models import ChatOpenAI
 
-from .config import get_settings
+from api.core.config import get_settings
 
 
 class ChatClient:

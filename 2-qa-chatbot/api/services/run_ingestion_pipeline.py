@@ -2,7 +2,7 @@ from collections.abc import Iterable
 
 from loguru import logger
 
-from .document_ingestion import DocumentIngestionService
+from api.services.document_ingestion import DocumentIngestionService
 
 
 def run_ingestion_pipeline(urls: Iterable[str]) -> None:

@@ -3,7 +3,7 @@
 from collections.abc import Iterable
 from typing import Any
 
-from core.config import get_settings
+from api.core.config import get_settings
 from loguru import logger
 from pymilvus import MilvusClient
 
