@@ -1,22 +1,20 @@
 """Document ingestion pipeline for turning URLs into Milvus embeddings."""
 
+from __future__ import annotations
+
 from langchain.docstore.document import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders.url_selenium import SeleniumURLLoader
+from langchain_milvus import Milvus
+from langchain_openai.embeddings import OpenAIEmbeddings
 from loguru import logger
 from pydantic import HttpUrl
-from pymilvus.model.dense import OpenAIEmbeddingFunction
 
 from api.core.config import get_settings
-from api.core.vector_store import DocumentStore
 
 
 class DocumentIngestionService:
-    """
-    High-level ingestion flow service for documents.
-
-    Load -> clean -> split -> embed -> store
-    """
+    """Ingestion flow service for documents."""
 
     def __init__(self, urls: list[HttpUrl]):
         self.settings = get_settings()
@@ -25,11 +23,16 @@ class DocumentIngestionService:
             chunk_size=self.settings.chunk_size,
             chunk_overlap=self.settings.chunk_overlap,
         )
-        self.embedding_fn = OpenAIEmbeddingFunction(
-            model_name=self.settings.openai_embeddings_model,
+        self.embeddings = OpenAIEmbeddings(
             api_key=self.settings.openai_api_key,
+            model=self.settings.openai_embeddings_model,
         )
-        self.store = DocumentStore()
+        self.vector_store = Milvus(
+            embedding_function=self.embeddings,
+            collection_name=self.settings.milvus_collection,
+            connection_args={"uri": self.settings.milvus_uri},
+            auto_id=True,
+        )
 
     def _load_raw_documents(self) -> list[Document]:
         docs = self.loader.load()
@@ -45,23 +48,23 @@ class DocumentIngestionService:
         logger.info(f"Split into {len(chunks)} chunks")
         return chunks
 
-    def _embed_documents(self, chunks: list[Document]) -> list[list[float]]:
-        texts = [chunk.page_content for chunk in chunks]
-        vectors = self.embedding_fn.encode_documents(texts)
-        logger.info(f"Generated {len(vectors)} embeddings")
-        return vectors
+    def _persist_chunks(self, chunks: list[Document]) -> None:
+        if not chunks:
+            return
 
-    def _store_embeddings(self, chunks: list[Document], embeddings: list[list[float]]):
-        metadatas = []
+        prepared_chunks: list[Document] = []
         for idx, chunk in enumerate(chunks):
             metadata = dict(chunk.metadata)
-            metadata["chunk_id"] = metadata.get("chunk_id", idx)
-            metadatas.append(metadata)
-        self.store.upsert(embeddings=embeddings, metadatas=metadatas)
+            metadata.setdefault("chunk_id", idx)
+            metadata.setdefault("source", metadata.get("url"))
+            chunk.metadata = metadata
+            prepared_chunks.append(chunk)
 
-    def run_pipeline(self):
+        self.vector_store.add_documents(prepared_chunks)
+        logger.info(f"Persisted {len(prepared_chunks)} chunks to Milvus")
+
+    def run_pipeline(self) -> None:
         raw_docs = self._load_raw_documents()
         cleaned_docs = self._clean_documents(raw_docs)
         chunks = self._split_documents(cleaned_docs)
-        embeddings = self._embed_documents(chunks)
-        self._store_embeddings(chunks, embeddings)
+        self._persist_chunks(chunks)

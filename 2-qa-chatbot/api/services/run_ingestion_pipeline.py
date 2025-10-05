@@ -11,6 +11,9 @@ def run_ingestion_pipeline(urls: Iterable[str]) -> None:
     try:
         service = DocumentIngestionService(urls=list(urls))
         service.run_pipeline()
+        logger.info(
+            f"Successfully completed ingestion pipeline for {len(urls)} URL(s)"
+        )
     except Exception:
         logger.exception("Failed to run ingestion service pipeline")
         raise
