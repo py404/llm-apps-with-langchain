@@ -33,9 +33,11 @@ It supports:
 - Env vars:
   - `OPENAI_API_KEY`
 - Milvus config (via `api/core/config.py`):
-  - `milvus_uri` (URI string understood by `langchain-milvus`) - this is our database name
-  - `milvus_collection` - a collection name to store embeddings
-  - `milvus_vector_dim` (should match embedding model) - dimensions of your vectors
+  - `milvus_uri` (URI string understood by `langchain-milvus`). Examples:
+    - Milvus server: `http://localhost:19530`
+    - Milvus Lite file (if supported): `file:///absolute/path/to/milvus.db`
+  - `milvus_collection` — collection name to store embeddings
+  - `milvus_vector_dim` — dimensions (match embedding model)
 
 ## Setup
 
@@ -107,6 +109,15 @@ uv run python cli/qa_service_cli.py --top-k 3 --max-context 500 "what happens wh
 What happens:
 
 - Retrieve `top‑k` chunks via `similarity_search_with_score`
-- Format a context block
+- Format a context block (deduped, score shown, JSON fenced where applicable)
 - Build a prompt and call the LLM asynchronously
 - Print question, answer, context, and sources
+
+## Troubleshooting
+
+- Invalid Milvus URI
+  - Ensure `milvus_uri` is a valid HTTP(S) server URL or a supported `file:///` path for Lite.
+- Empty or generic answers
+  - Re‑run ingestion for the target URL; ask more context‑anchored questions; adjust `--top-k` / `--max-context`.
+- Selenium loader issues
+  - Ensure a compatible browser/driver is installed or increase waits for dynamic content.
