@@ -46,9 +46,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     service = QAService(top_k=args.top_k, max_context_chars=args.max_context)
     result = asyncio.run(service.answer_question(args.question))
 
-    logger.info("Question:\n{}", result["query"])  # noqa: T201
-    logger.info("Answer:\n{}", result["answer"])  # noqa: T201
-    logger.info("Context:\n{}", result["context"])  # noqa: T201
+    logger.info(f"Question: {result['query']}")
+    logger.info(f"Answer: {result['answer']}")
+    logger.info(f"Context: {result['context']}")
 
     sources = []
     seen = set()
@@ -60,7 +60,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         sources.append(label)
 
     sources_output = "\n".join(sources) if sources else "No sources returned."
-    logger.info("Sources:\n{}", sources_output)  # noqa: T201
+    logger.info(f"Sources: {sources_output}")
 
 
 if __name__ == "__main__":  # pragma: no cover
