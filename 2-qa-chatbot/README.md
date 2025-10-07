@@ -121,3 +121,88 @@ What happens:
   - Re‑run ingestion for the target URL; ask more context‑anchored questions; adjust `--top-k` / `--max-context`.
 - Selenium loader issues
   - Ensure a compatible browser/driver is installed or increase waits for dynamic content.
+
+# QA Chatbot – Streamlit UI
+
+A minimal Streamlit interface to drive the QA Chatbot API.
+
+- Ingest: submit one or more URLs to the backend.
+- QA: ask a question against the ingested corpus and view answer, context, and sources.
+
+## Prerequisites
+
+- Python 3.12+
+- A running API (default at `http://localhost:8000`). See `README.md` in `api` folder for API setup.
+- Environment (optional):
+  - `QA_API_BASE` (defaults to `http://localhost:8000`)
+
+## Install
+
+```bash
+cd 2-qa-chatbot/ui
+uv sync
+```
+
+## Run
+
+```bash
+# Optionally point the UI to a different API base
+export QA_API_BASE=http://localhost:8000
+
+# Start Streamlit
+uv run streamlit run app.py
+```
+
+## Usage
+
+- Ingest tab
+  - Paste one URL per line and click Ingest
+  - Shows per‑URL status and a short summary
+- QA tab
+  - Enter a question, set `Top K` and `Max context`, click `Ask`
+  - Shows the answer, deduped sources, and a collapsible context block
+
+The sidebar displays/overrides the API base and lets you clear the in‑session history.
+
+## Notes
+
+- The UI uses `httpx` library with short‑lived async clients to avoid event‑loop issues in Streamlit reruns.
+- API errors are surfaced inline; verify the API is reachable and that you’ve ingested URLs first.
+
+## API Examples (curl)
+
+POST /ingest
+```
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"urls": ["https://example.com/a", "https://example.com/b"]}' \
+  http://localhost:8000/ingest
+```
+
+POST /qa
+```
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What does the article say about logging?", "top_k": 4, "max_context": 1800}' \
+  http://localhost:8000/qa
+```
+
+## .env Example (API)
+
+Place a `.env` in `2-qa-chatbot/api` (pydantic-settings will pick it up):
+```
+OPENAI_API_KEY=sk-...
+
+# Milvus Lite (default for this project)
+milvus_uri=file:///absolute/path/to/milvus.db
+milvus_collection=qa_chunks
+milvus_vector_dim=1536
+
+# Chunking
+chunk_size=800
+chunk_overlap=120
+```
+
+Notes:
+- This project defaults to Milvus Lite with a file URI. If you run a Milvus server, use an HTTP(S) URI like `http://localhost:19530` instead.
+- Ensure the embedding dimension matches your embeddings model output.
