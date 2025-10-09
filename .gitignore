@@ -117,6 +117,7 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+*.db
 
 # Flask stuff:
 instance/
@@ -255,5 +256,9 @@ sketch
 # Ignore all local history of files
 .history
 .ionide
+
+### Local DB files ###
+# Ignore all local database files -> SQLite, Milvus etc.
+*.db
 
 # End of https://www.toptal.com/developers/gitignore/api/python,react,nextjs,dotenv,visualstudiocode,jupyternotebooks

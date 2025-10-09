@@ -1,0 +1,25 @@
+[project]
+name = "qa-chatbot-api"
+version = "0.1.0"
+description = "A QA Chatbot API using FastAPI and LangChain with conversational capabilities."
+authors = [ { name="Phani Atmakur" } ]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.118.0",
+    "langchain>=0.3.27",
+    "langchain-community>=0.3.30",
+    "langchain-milvus>=0.2.1",
+    "langchain-openai>=0.3.34",
+    "loguru>=0.7.3",
+    "openai>=2.1.0",
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.11.0",
+    "pymilvus[milvus-lite,model]>=2.6.2",
+    "selenium>=4.36.0",
+    "unstructured>=0.18.15",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.13.2",
+]
