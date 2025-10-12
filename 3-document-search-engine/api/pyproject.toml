@@ -1,0 +1,9 @@
+[project]
+name = "document-semantic-search-engine-api"
+description = "A document search engine API using FastAPI, LangChain and Milvus DB."
+authors = [{ name = "Phani Atmakur" }]
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.119.0",
+]
