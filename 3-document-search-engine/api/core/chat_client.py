@@ -11,7 +11,7 @@ class ChatClient:
     def __init__(self, model: str = "gpt-4o-mini", temperature: float = 0.0):
         settings = get_settings()
         self._client = ChatOpenAI(
-            api_key=settings.openai_api_key,
+            api_key=settings.OPENAI_API_KEY,
             model=model,
             temperature=temperature,
         )
